@@ -74,6 +74,19 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 ```
 
+## 通过 `.m3u8` 地址手动录像
+
+此脚本适用于任何已知 `.m3u8` 地址的情况，不过只能对传入的该场直播进行录像，无法监视后续直播与自动录像。
+
+如果上面的脚本没有适配某个平台（比如 Mirrativ、SHOWROOM），你也可以自己抓取出 `.m3u8` 地址手动开始录像。
+
+```bash
+./record_m3u8.sh https://record.mirrativ.com/archive/hls/39/0018438274/playlist.m3u8
+```
+
+参数为 `.m3u8` 地址，录像的文件名格式为 `stream_{id}_YYMMDD_HHMMSS.ts`。
+
+
 ## 后台运行脚本
 
 如果用上面那些方式运行脚本，终端退出后脚本就会停止，所以你需要使用 `nohup` 命令将脚本放到后台中运行：
@@ -86,7 +99,7 @@ nohup ./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJA
 
 其他脚本同理：
 
-```text
+```bash
 nohup ./record_twitch.sh kagura0mea > mea_twitch.log &
 nohup ./record_twitcast.sh kaguramea > mea_twitcast.log &
 nohup ./record_openrec.sh KaguraMea > mea_openrec.log &
