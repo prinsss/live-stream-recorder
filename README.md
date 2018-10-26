@@ -1,6 +1,6 @@
 # Live Stream Recorder
 
-一系列简陋的 Bash 脚本，可以实现 YouTube、Twitch、TwitCasting 等平台主播开播时自动录像。
+一系列简陋的 Bash 脚本，可以实现 YouTube、OPENREC、Twitch、TwitCasting 等平台主播开播时自动录像。
 
 因为我喜欢的 VTuber [神楽めあ](https://twitter.com/freeze_mea) 是个喜欢突击直播还不留档的惯犯，所以我写了这些脚本挂在 VPS 上监视直播动态，一开播就自动开始录像，这样就算错过了直播也不用担心。
 
@@ -22,7 +22,7 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 
 ## YouTube 自动录像
 
-```
+```bash
 ./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live"
 ```
 
@@ -30,13 +30,13 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 
 录像文件默认保存在脚本文件所在的目录下，文件名格式为 `youtube_{id}_YYMMDD_HHMMSS_{title}.ts`，比如 `youtube_vFfIDm35SbA_20181021_203125_反省会.ts`。输出的视频文件使用 MPEG-2 TS 容器格式保存，因为 TS 格式有着可以从任意位置开始解码的优势，就算录像过程中因为网络波动等问题造成了中断，也不至于损坏整个视频文件。如果需要转换为 MP4 格式，可以使用以下命令：
 
-```
+```bash
 ffmpeg -i xxx.ts -codec copy xxx.mp4
 ```
 
 ## Twitch 自动录像
 
-```
+```bash
 ./record_twitch.sh kagura0mea
 ```
 
@@ -46,7 +46,7 @@ ffmpeg -i xxx.ts -codec copy xxx.mp4
 
 ## TwitCasting 自动录像
 
-```
+```bash
 ./record_twitcast.sh kaguramea
 ```
 
@@ -54,11 +54,31 @@ ffmpeg -i xxx.ts -codec copy xxx.mp4
 
 录像的文件名格式为 `twitcast_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
 
+## OPENREC 自动录像
+
+```bash
+./record_openrec.sh KaguraMea
+```
+
+此脚本依赖 curl 以从用户频道页面获取当前的直播信息。
+
+参数为 OPENREC 用户名，就是用户主页 URL 中 `openrec.tv/user` 后面的那个。
+
+录像的文件名格式为 `openrec_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
+
+另外，streamlink v0.14.2 对 OPENREC 的支持有问题，你需要参照这个 [issue](https://github.com/streamlink/streamlink/issues/1960#issuecomment-408809306) 手动加载更新后的 streamlink OPENREC 插件，或者等待 streamlink 本体发布新版本。如果运行中出现了 `error: 'ascii' codec can't encode character` 错误，那么你可能需要升级 Python 2.x 至 Python 3.x，或者在 `streamlink/plugins/openrectv.py` 文件的头部添加以下代码：
+
+```python
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+```
+
 ## 后台运行脚本
 
 如果用上面那些方式运行脚本，终端退出后脚本就会停止，所以你需要使用 `nohup` 命令将脚本放到后台中运行：
 
-```
+```bash
 nohup ./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live" > mea.log &
 ```
 
@@ -66,14 +86,15 @@ nohup ./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJA
 
 其他脚本同理：
 
-```
+```text
 nohup ./record_twitch.sh kagura0mea > mea_twitch.log &
 nohup ./record_twitcast.sh kaguramea > mea_twitcast.log &
+nohup ./record_openrec.sh KaguraMea > mea_openrec.log &
 ```
 
 使用命令 `ps -ef | grep record` 可以列出当前正在后台运行的录像脚本，其中第一个数字即为脚本进程的 PID：
 
-```
+```text
 root      1166     1  0 13:21 ?        00:00:00 /bin/bash ./record_youtube.sh ...
 root      1558     1  0 13:25 ?        00:00:00 /bin/bash ./record_twitcast.sh ...
 root      1751     1  0 13:27 ?        00:00:00 /bin/bash ./record_twitch.sh ...
@@ -87,13 +108,13 @@ YouTube 录像脚本中，youtube-dl 调起的 ffmpeg 进程有时候在直播�
 
 首先运行 `ps -ef | grep youtube-dl` 获取 `youtube-dl` 进程的 PID：
 
-```
+```text
 root     26614  1166 29 20:31 ?        00:00:00 /usr/bin/python /usr/local/bin/youtube-dl --no-playlist --playlist-items 1 --match-filter is_live --hls-use-mpegts -o youtube_%(id)s_20181021_203125_%(title)s.ts https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live
 ```
 
 然后使用以下命令向 youtube-dl 进程发送 `SIGINT` 信号终止程序：
 
-```
+```bash
 kill -s INT 26614
 ```
 
