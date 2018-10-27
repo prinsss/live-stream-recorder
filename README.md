@@ -23,10 +23,15 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 ## YouTube 自动录像
 
 ```bash
-./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live" best
+./record_youtube.sh url [format] [loop|once]
+
+# Example
+./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live"
+./record_youtube.sh "https://www.youtube.com/watch?v=NeQrejV3JnE" best once
+./record_youtube.sh "https://youtu.be/WMu7SGeUTG4" "bestvideo[height<=480]+bestaudio"
 ```
 
-第一个参数为 YouTube 频道待机室的 URL（即在频道 URL 后面添加 `/live`），这样可以实现无人值守监视开播。参数也可以是某次直播的直播页面 URL（`./record_youtube.sh "https://www.youtube.com/watch?v=9KbIgi3qEb4"`），不过这样就只能对这一场直播进行录像，录不到该频道的后续直播，所以推荐使用前者。如果频道主关闭了非直播时间的 `/live` 待机室也没关系，脚本也对此情况进行了适配。
+第一个参数为 YouTube 频道待机室的 URL（即在频道 URL 后面添加 `/live`），这样可以实现无人值守监视开播。参数也可以是某次直播的直播页面 URL（如示例二），不过这样就只能对这一场直播进行录像，录不到该频道的后续直播，所以推荐使用前者。如果频道主关闭了非直播时间的 `/live` 待机室也没关系，脚本也对此情况进行了适配。
 
 第二个参数为可选参数，指定录像的画质，不指定的话默认以最高不大于 720p 的格式录像（即 `best[height<=720]`）。指定为 `best` 即可使用可用的最高画质进行录像（注意机器硬盘空间），更多可以使用的格式字符串请参考 [youtube-dl `-f` 参数的文档](https://github.com/rg3/youtube-dl#format-selection)。
 
@@ -40,35 +45,23 @@ ffmpeg -i xxx.ts -codec copy xxx.mp4
 
 另外，当前直播的元信息（包括标题、概要栏等）保存在 `视频文件名.info.json` 文件中，录像时 ffmpeg 进程的详细输出会写入至 `视频文件名.log` 日志文件，使用 `tail -f xxx.log` 命令可以实时查看。
 
-## Twitch 自动录像
-
-```bash
-./record_twitch.sh kagura0mea
-```
-
-参数为 Twitch 用户名，就是直播页面 URL 中 `twitch.tv` 后面的那个。
-
-录像的文件名格式为 `twitch_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
-
-## TwitCasting 自动录像
-
-```bash
-./record_twitcast.sh kaguramea
-```
-
-参数为 TwitCasting 用户名，就是直播页面 URL 中 `twitcasting.tv` 后面的那个。
-
-录像的文件名格式为 `twitcast_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
-
 ## OPENREC 自动录像
 
 ```bash
-./record_openrec.sh KaguraMea
+./record_openrec.sh openrec_id [format] [loop|once]
+
+# Example
+./record_openrec.sh KaguraMea 480p
+./record_openrec.sh 23_kanae best once
 ```
 
 此脚本依赖 curl 以从用户频道页面获取当前的直播信息。
 
-参数为 OPENREC 用户名，就是用户主页 URL 中 `openrec.tv/user` 后面的那个。
+第一个参数为 OPENREC 用户名，就是用户主页 URL 中 `openrec.tv/user` 后面的那个。
+
+第二个参数为可选参数，指定录像的画质，不指定的话默认以最高不大于 720p 的格式录像（即 `720p,480p,best`）。指定为 `best` 即可使用可用的最高画质进行录像（注意机器硬盘空间），更多可以使用的格式字符串请参考 [streamlink `STREAM` 参数的文档](https://streamlink.github.io/cli.html#cmdoption-arg-stream)。
+
+第三个参数为可选参数，如果指定为 `once`，那么当前直播的录像完成后脚本会自动退出，而不会继续监视后续直播。
 
 录像的文件名格式为 `openrec_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
 
@@ -80,6 +73,34 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 ```
 
+## Twitch 自动录像
+
+```bash
+./record_twitch.sh twitch_id [format] [loop|once]
+
+# Example
+./record_twitch.sh kagura0mea 480p
+./record_twitch.sh wuyikoei best once
+```
+
+第一个参数为 Twitch 用户名，就是直播页面 URL 中 `twitch.tv` 后面的那个。第二、第三个参数与 OPENREC 的脚本相同。
+
+录像的文件名格式为 `twitch_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
+
+## TwitCasting 自动录像
+
+```bash
+./record_twitcast.sh twitcasting_id [loop|once]
+
+# Example
+./record_twitcast.sh kaguramea
+./record_twitcast.sh twitcasting_jp once
+```
+
+第一个参数为 TwitCasting 用户名，就是直播页面 URL 中 `twitcasting.tv` 后面的那个。第二个参数为可选参数，如果指定为 `once`，那么当前直播的录像完成后脚本会自动退出，而不会继续监视后续直播。此脚本无法指定要抓取的直播流的画质。
+
+录像的文件名格式为 `twitcast_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
+
 ## 通过 `.m3u8` 地址手动录像
 
 此脚本适用于任何已知 `.m3u8` 地址的情况，不过只能对传入的该场直播进行录像，无法监视后续直播与自动录像。
@@ -90,8 +111,9 @@ sys.setdefaultencoding('utf8')
 ./record_m3u8.sh https://record.mirrativ.com/archive/hls/39/0018438274/playlist.m3u8
 ```
 
-参数为 `.m3u8` 地址，录像的文件名格式为 `stream_{id}_YYMMDD_HHMMSS.ts`。
+第一个参数为 `.m3u8` 地址，录像的文件名格式为 `stream_{id}_YYMMDD_HHMMSS.ts`。
 
+第二个参数为可选参数，指定为 `loop` 可以让脚本每隔 30s 尝试下载该 `.m3u8` 地址。
 
 ## 后台运行脚本
 
