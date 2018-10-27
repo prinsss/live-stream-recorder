@@ -1,20 +1,39 @@
 #!/bin/bash
-# Automatic Twitch Streaming Recorder
-# echo -ne "\033]0;[REC] Twitch $1\007"
+# Twitch Live Stream Recorder
 
-if [ -n "$1" ]; then
-  # Record using MPEG-2 TS format to avoid broken file caused by interruption
-  FNAME="twitch_${1}_$(date +"%Y%m%d_%H%M%S").ts"
-  CMD="ffmpeg -i $(streamlink --stream-url "twitch.tv/$1" best) -codec copy -f mpegts $FNAME"
+if [ ! -n "$1" ]; then
+  echo "usage: $0 twitch_id [format] [loop|once]"
+  exit 1
+fi
 
+# Record the best format available but not better that 720p by default
+FORMAT="${2:-720p,480p,best}"
+
+while true; do
+  # Monitor live streams of specific channel
   while true; do
-    $CMD
     LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
+    echo "$LOG_PREFIX Try to get current live stream of twitch.tv/$1"
+
+    # Get the m3u8 address with streamlink
+    M3U8_URL=$(streamlink --stream-url "twitch.tv/$1" "$FORMAT")
+    (echo "$M3U8_URL" | grep -q ".m3u8") && break
+
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after 30 seconds..."
     sleep 30
   done
 
-else
-  echo "usage: $0 twitch_id"
-fi
+  # Record using MPEG-2 TS format to avoid broken file caused by interruption
+  FNAME="twitch_${1}_$(date +"%Y%m%d_%H%M%S").ts"
+  echo "$LOG_PREFIX Start recording, stream saved to \"$FNAME\"."
+  echo "$LOG_PREFIX Use command \"tail -f $FNAME.log\" to track recording progress."
+
+  # Start recording
+  ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1
+
+  # Exit if we just need to record current stream
+  LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
+  echo "$LOG_PREFIX Live stream recording stopped."
+  [ "$3" == "once" ] && break
+done

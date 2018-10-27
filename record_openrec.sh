@@ -1,30 +1,44 @@
 #!/bin/bash
-# Automatic OPENREC.tv Streaming Recorder
-# echo -ne "\033]0;[REC] OPENREC $1\007"
+# OPENREC.tv Live Stream Recorder
 
-if [ -n "$1" ]; then
+if [ ! -n "$1" ]; then
+  echo "usage: $0 openrec_id [format] [loop|once]"
+  exit 1
+fi
 
+# Record the best format available but not better that 720p by default
+FORMAT="${2:-720p,480p,best}"
+
+while true; do
+  # Monitor live streams of specific channel
   while true; do
     LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
+    echo "$LOG_PREFIX Try to get current live stream of openrec.tv/user/$1"
 
     # Extract current live stream from channel page
-    echo "$LOG_PREFIX Try to get current live stream from openrec.tv/user/$1"
-
     LIVE_URL=$(curl -s "https://www.openrec.tv/user/$1" |\
       grep -Eoi "href=\"https://www.openrec.tv/live/(.+)\" class" |\
-      head -n 1 | cut -c "7-" | cut -d "\"" -f 1)
-
-    if [ ! -z "$LIVE_URL" ]; then
-      # Record using MPEG-2 TS format to avoid broken file caused by interruption
-      FNAME="openrec_${1}_$(date +"%Y%m%d_%H%M%S").ts"
-      ffmpeg -i $(streamlink --stream-url $LIVE_URL best) -codec copy -f mpegts $FNAME
-    fi
+      head -n 1 | cut -d '"' -f 2)
+    [ -n "$LIVE_URL" ] && break
 
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after 30 seconds..."
     sleep 30
   done
 
-else
-  echo "usage: $0 openrec_id"
-fi
+  # Get the m3u8 address with streamlink
+  M3U8_URL=$(streamlink --stream-url "$LIVE_URL" "$FORMAT")
+
+  # Record using MPEG-2 TS format to avoid broken file caused by interruption
+  FNAME="openrec_${1}_$(date +"%Y%m%d_%H%M%S").ts"
+  echo "$LOG_PREFIX Start recording, stream saved to \"$FNAME\"."
+  echo "$LOG_PREFIX Use command \"tail -f $FNAME.log\" to track recording progress."
+
+  # Start recording
+  ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1
+
+  # Exit if we just need to record current stream
+  LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
+  echo "$LOG_PREFIX Live stream recording stopped."
+  [ "$3" == "once" ] && break
+done
