@@ -26,12 +26,13 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 ./record_youtube.sh url [format] [loop|once]
 
 # Example
-./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live"
+./record_youtube.sh "UCWCc8tO-uUl_7SJXIKJACMw"
+./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live" best loop
 ./record_youtube.sh "https://www.youtube.com/watch?v=NeQrejV3JnE" best once
 ./record_youtube.sh "https://youtu.be/WMu7SGeUTG4" "bestvideo[height<=480]+bestaudio"
 ```
 
-第一个参数为 YouTube 频道待机室的 URL（即在频道 URL 后面添加 `/live`），这样可以实现无人值守监视开播。参数也可以是某次直播的直播页面 URL（如示例二），不过这样就只能对这一场直播进行录像，录不到该频道的后续直播，所以推荐使用前者。如果频道主关闭了非直播时间的 `/live` 待机室也没关系，脚本也对此情况进行了适配。
+第一个参数为 YouTube 频道 ID（就是频道 URL `youtube.com/channel` 后面的那个），或者待机室的 URL（即在频道 URL 后面添加 `/live`），这样可以实现无人值守监视开播。参数也可以是某次直播的直播页面 URL（如示例三），不过这样就只能对这一场直播进行录像，录不到该频道的后续直播，所以推荐使用前者。
 
 第二个参数为可选参数，指定录像的画质，不指定的话默认以最高不大于 720p 的格式录像（即 `best[height<=720]`）。指定为 `best` 即可使用可用的最高画质进行录像（注意机器硬盘空间），更多可以使用的格式字符串请参考 [youtube-dl `-f` 参数的文档](https://github.com/rg3/youtube-dl#format-selection)。
 
@@ -120,7 +121,7 @@ sys.setdefaultencoding('utf8')
 如果用上面那些方式运行脚本，终端退出后脚本就会停止，所以你需要使用 `nohup` 命令将脚本放到后台中运行：
 
 ```bash
-nohup ./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live" > mea.log &
+nohup ./record_youtube.sh "UCWCc8tO-uUl_7SJXIKJACMw" > mea.log &
 ```
 
 这会把脚本的输出写入至日志文件 `mea.log`（文件名自己修改），你可以随时使用 `tail -f mea.log` 命令查看实时日志。
@@ -139,6 +140,7 @@ nohup ./record_openrec.sh KaguraMea > mea_openrec.log &
 root      1166     1  0 13:21 ?        00:00:00 /bin/bash ./record_youtube.sh ...
 root      1558     1  0 13:25 ?        00:00:00 /bin/bash ./record_twitcast.sh ...
 root      1751     1  0 13:27 ?        00:00:00 /bin/bash ./record_twitch.sh ...
+root      1755     1  0 13:29 ?        00:00:00 /bin/bash ./record_openrec.sh ...
 ```
 
 如果需要终止正在后台运行的脚本，可以使用命令 `kill {pid}`（比如要终止上面的第一个 YouTube 录像脚本，运行 `kill 1166` 即可）。
