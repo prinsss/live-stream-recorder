@@ -28,13 +28,17 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 
 第一个参数为 YouTube 频道待机室的 URL（即在频道 URL 后面添加 `/live`），这样可以实现无人值守监视开播。参数也可以是某次直播的直播页面 URL（`./record_youtube.sh "https://www.youtube.com/watch?v=9KbIgi3qEb4"`），不过这样就只能对这一场直播进行录像，录不到该频道的后续直播，所以推荐使用前者。如果频道主关闭了非直播时间的 `/live` 待机室也没关系，脚本也对此情况进行了适配。
 
-第二个参数为录像的画质，不指定的话默认以最高不大于 720p 的格式录像（即 `best[height<=720]`）。指定为 `best` 即可使用可用的最高画质进行录像（注意机器硬盘空间），更多可以使用的格式字符串请参考 [youtube-dl `-f` 参数的文档](https://github.com/rg3/youtube-dl#format-selection)。
+第二个参数为可选参数，指定录像的画质，不指定的话默认以最高不大于 720p 的格式录像（即 `best[height<=720]`）。指定为 `best` 即可使用可用的最高画质进行录像（注意机器硬盘空间），更多可以使用的格式字符串请参考 [youtube-dl `-f` 参数的文档](https://github.com/rg3/youtube-dl#format-selection)。
 
-录像文件默认保存在脚本文件所在的目录下，文件名格式为 `youtube_{id}_YYMMDD_HHMMSS_{title}.ts`，比如 `youtube_vFfIDm35SbA_20181021_203125_反省会.ts`。输出的视频文件使用 MPEG-2 TS 容器格式保存，因为 TS 格式有着可以从任意位置开始解码的优势，就算录像过程中因为网络波动等问题造成了中断，也不至于损坏整个视频文件。如果需要转换为 MP4 格式，可以使用以下命令：
+第三个参数为可选参数，如果指定为 `once`，那么当前直播的录像完成后脚本会自动退出，而不会继续监视后续直播。
+
+录像文件默认保存在脚本文件所在的目录下，文件名格式为 `youtube_{id}_YYMMDD_HHMMSS.ts`。输出的视频文件使用 MPEG-2 TS 容器格式保存，因为 TS 格式有着可以从任意位置开始解码的优势，就算录像过程中因为网络波动等问题造成了中断，也不至于损坏整个视频文件。如果需要转换为 MP4 格式，可以使用以下命令：
 
 ```bash
 ffmpeg -i xxx.ts -codec copy xxx.mp4
 ```
+
+另外，当前直播的元信息（包括标题、概要栏等）保存在 `视频文件名.info.json` 文件中，录像时 ffmpeg 进程的详细输出会写入至 `视频文件名.log` 日志文件，使用 `tail -f xxx.log` 命令可以实时查看。
 
 ## Twitch 自动录像
 
