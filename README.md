@@ -116,6 +116,28 @@ sys.setdefaultencoding('utf8')
 
 第二个参数为可选参数，指定为 `loop` 可以让脚本每隔 30s 尝试下载该 `.m3u8` 地址。
 
+## 转播推流
+
+这些脚本虽然是用来录像的，但是稍微修改一下也可以用于推流转播至其他直播平台。
+
+将各脚本中的：
+
+```bash
+ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1
+```
+
+修改为：
+
+```bash
+RTMP_URL="这里填你的 RTMP 推流地址"
+ffmpeg -i "$M3U8_URL" \
+  -codec copy -f mpegts "$FNAME" \ # 不需要录像的可以去掉这一行
+  -vcodec copy -acodec aac -strict -2 -f flv "$RTMP_URL" \
+  > "$FNAME.log" 2>&1
+```
+
+即可实现同时录像与转播推流。
+
 ## 后台运行脚本
 
 如果用上面那些方式运行脚本，终端退出后脚本就会停止，所以你需要使用 `nohup` 命令将脚本放到后台中运行：
