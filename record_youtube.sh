@@ -5,8 +5,12 @@
 if [ -n "$1" ]; then
   # Record using MPEG-2 TS format to avoid broken file caused by interruption
   FNAME="youtube_%(id)s_$(date +"%Y%m%d_%H%M%S")_%(title)s.ts"
+  # Record the best format available but not better that 720p by default
+  FORMAT="${2:-best[height<=720]}"
+
   # Adapt for passing channel URL directly or the taiki-heya is closed
-  CMD="youtube-dl --no-playlist --playlist-items 1 --match-filter is_live \
+  CMD="youtube-dl -f $FORMAT \
+    --no-playlist --playlist-items 1 --match-filter is_live \
     --hls-use-mpegts -o $FNAME $1"
 
   while true; do
@@ -18,5 +22,5 @@ if [ -n "$1" ]; then
   done
 
 else
-  echo "usage: $0 youtube_live_page"
+  echo "usage: $0 youtube_live_url [format]"
 fi
