@@ -1,14 +1,13 @@
 #!/bin/bash
 # YouTube Live Stream Recorder
 
-if [ ! -n "$1" ]; then
+if [[ ! -n "$1" ]]; then
   echo "usage: $0 youtube_channel_id|live_url [format] [loop|once]"
   exit 1
 fi
 
 # Construct full URL if only channel id given
 LIVE_URL=$1
-# Use double square brackets construct here to test substring
 [[ "$1" == "http"* ]] || LIVE_URL="https://www.youtube.com/channel/$1/live"
 
 # Record the best format available but not better that 720p by default
@@ -26,7 +25,7 @@ while true; do
     M3U8_URL=$(youtube-dl -g -f "$FORMAT" \
       --no-playlist --playlist-items 1 \
       --match-filter is_live "$LIVE_URL" 2>/dev/null)
-    [ -n "$M3U8_URL" ] && break
+    [[ -n "$M3U8_URL" ]] && break
 
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after 30 seconds..."
@@ -52,5 +51,5 @@ while true; do
   # Exit if we just need to record current stream
   LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
   echo "$LOG_PREFIX Live stream recording stopped."
-  [ "$3" == "once" ] && break
+  [[ "$3" == "once" ]] && break
 done

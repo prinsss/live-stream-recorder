@@ -1,7 +1,7 @@
 #!/bin/bash
 # Twitch Live Stream Recorder
 
-if [ ! -n "$1" ]; then
+if [[ ! -n "$1" ]]; then
   echo "usage: $0 twitch_id [format] [loop|once]"
   exit 1
 fi
@@ -35,5 +35,5 @@ while true; do
   # Exit if we just need to record current stream
   LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
   echo "$LOG_PREFIX Live stream recording stopped."
-  [ "$3" == "once" ] && break
+  [[ "$3" == "once" ]] && break
 done

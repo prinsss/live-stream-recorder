@@ -1,7 +1,7 @@
 #!/bin/bash
 # OPENREC.tv Live Stream Recorder
 
-if [ ! -n "$1" ]; then
+if [[ ! -n "$1" ]]; then
   echo "usage: $0 openrec_id [format] [loop|once]"
   exit 1
 fi
@@ -19,7 +19,7 @@ while true; do
     LIVE_URL=$(curl -s "https://www.openrec.tv/user/$1" |\
       grep -Eoi "href=\"https://www.openrec.tv/live/(.+)\" class" |\
       head -n 1 | cut -d '"' -f 2)
-    [ -n "$LIVE_URL" ] && break
+    [[ -n "$LIVE_URL" ]] && break
 
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after 30 seconds..."
@@ -40,5 +40,5 @@ while true; do
   # Exit if we just need to record current stream
   LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
   echo "$LOG_PREFIX Live stream recording stopped."
-  [ "$3" == "once" ] && break
+  [[ "$3" == "once" ]] && break
 done

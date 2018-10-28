@@ -1,7 +1,7 @@
 #!/bin/bash
 # TwitCasting Live Stream Recorder
 
-if [ ! -n "$1" ]; then
+if [[ ! -n "$1" ]]; then
   echo "usage: $0 twitcasting_id [loop|once]"
   exit 1
 fi
@@ -32,5 +32,5 @@ while true; do
   # Exit if we just need to record current stream
   LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
   echo "$LOG_PREFIX Live stream recording stopped."
-  [ "$2" == "once" ] && break
+  [[ "$2" == "once" ]] && break
 done
