@@ -8,7 +8,8 @@ fi
 
 # Construct full URL if only channel id given
 LIVE_URL=$1
-[ "$1" == http* ] || LIVE_URL="https://www.youtube.com/channel/$1/live"
+# Use double square brackets construct here to test substring
+[[ "$1" == "http"* ]] || LIVE_URL="https://www.youtube.com/channel/$1/live"
 
 # Record the best format available but not better that 720p by default
 FORMAT="${2:-best[height<=720]}"
