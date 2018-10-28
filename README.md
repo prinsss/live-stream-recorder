@@ -169,23 +169,19 @@ root      1755     1  0 13:29 ?        00:00:00 /bin/bash ./record_openrec.sh ..
 
 ## 已知问题
 
-YouTube 录像脚本中，youtube-dl 调起的 ffmpeg 进程有时候在直播结束后还会继续运行，一直持续很长时间才自动退出（几十分钟到几小时不等，表现为日志文件中不断出现的 `Last message repeated xxx times`），原因不明，似乎是 youtube-dl 的一个 [BUG](https://github.com/rg3/youtube-dl/issues/12271)。如果 ffmpeg 进程一直不退出就会造成阻塞，导致在这段时间内新开的直播无法录像，所以推荐在看到 YouTube 下播后手动终止一下可能挂起的 ffmpeg 进程。
+YouTube 录像脚本中，ffmpeg 进程有时候在直播结束后还会继续运行，一直持续很长时间才自动退出（短则几十分钟，长则数小时，表现为日志文件不再更新或者不断出现 `Last message repeated xxx times`），[原因不明](https://github.com/rg3/youtube-dl/issues/12271)（正在尝试解决）。如果 ffmpeg 进程一直不退出就会造成阻塞，导致在这段时间内新开的直播无法录像，所以推荐在看到 YouTube 下播后手动终止一下可能挂起的 ffmpeg 进程。
 
-首先运行 `ps -ef | grep youtube-dl` 获取 `youtube-dl` 进程的 PID：
+首先运行 `ps -ef | grep ffmpeg` 获取 ffmpeg 进程的 PID：
 
 ```text
-root     26614  1166 29 20:31 ?        00:00:00 /usr/bin/python /usr/local/bin/youtube-dl --no-playlist --playlist-items 1 --match-filter is_live --hls-use-mpegts -o youtube_%(id)s_20181021_203125_%(title)s.ts https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live
+root     26614  1919  0 18:23 pts/3    00:00:10 ffmpeg -i https://manifest.googlevideo.com/.../index.m3u8 -codec copy -f mpegts youtube_r0hNJe2pQ8s_20181028_182353.ts
 ```
 
-然后使用以下命令向 youtube-dl 进程发送 `SIGINT` 信号终止程序：
+然后使用 `kill` 命令终止 ffmpeg 进程：
 
 ```bash
-kill -s INT 26614
+kill 26614
 ```
-
-为什么是向 youtube-dl 而非 ffmpeg 进程发送信号？因为 youtube-dl 在 ffmpeg 进程正常退出之后还需要进行一些操作（比如对 `.part` 文件进行处理），而如果直接向 ffmpeg 进程发送 `SIGINT` 信号会让 youtube-dl 以为 ffmpeg 进程异常退出（而非接受用户的中断指令退出），就不会进行那些后续处理。发送 `SIGINT` 信号而非其他信号也是为了让它可以执行这些操作。
-
-如果是其他平台的录像脚本，那直接向 ffmpeg 进程发送 `SIGINT` 信号就可以了。
 
 ## 开源许可
 
