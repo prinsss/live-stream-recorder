@@ -102,6 +102,22 @@ sys.setdefaultencoding('utf8')
 
 录像的文件名格式为 `twitcast_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
 
+## 其他直播平台自动录像
+
+基本上 [streamlink 支持的直播站点](https://streamlink.github.io/plugin_matrix.html) 都支持（包括国内的斗鱼、熊猫什么的）。
+
+```bash
+./record_streamlink.sh live_url [format] [loop|once]
+
+# Example
+./record_streamlink.sh "https://www.douyu.com/3614"
+./record_streamlink.sh "https://www.panda.tv/371037"
+```
+
+第一个参数为直播间 URL，第二、第三个参数与 OPENREC 的脚本相同。
+
+录像的文件名格式为 `stream_YYMMDD_HHMMSS.ts`，其他与上面的相同。
+
 ## 通过 `.m3u8` 地址手动录像
 
 此脚本适用于任何已知 `.m3u8` 地址的情况，不过只能对传入的该场直播进行录像，无法监视后续直播与自动录像。
@@ -109,10 +125,10 @@ sys.setdefaultencoding('utf8')
 如果上面的脚本没有适配某个平台（比如 Mirrativ、SHOWROOM），你也可以自己抓取出 `.m3u8` 地址手动开始录像。
 
 ```bash
-./record_m3u8.sh https://record.mirrativ.com/archive/hls/39/0018438274/playlist.m3u8
+./record_m3u8.sh "https://record.mirrativ.com/archive/hls/39/0018438274/playlist.m3u8"
 ```
 
-第一个参数为 `.m3u8` 地址，录像的文件名格式为 `stream_{id}_YYMMDD_HHMMSS.ts`。
+第一个参数为 `.m3u8` 地址，录像的文件名格式为 `stream_YYMMDD_HHMMSS.ts`。
 
 第二个参数为可选参数，指定为 `loop` 可以让脚本每隔 30s 尝试下载该 `.m3u8` 地址。
 
