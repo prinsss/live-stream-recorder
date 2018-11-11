@@ -50,7 +50,7 @@ while True :
     Log_Date = time.strftime("%Y-%m-%d %H-%M-%S", time.localtime())
     
     # Monitor live streams of specific channel
-    while True :
+    while True:
 
         try :
             # Get the M3U8 Dict address with streamlink
