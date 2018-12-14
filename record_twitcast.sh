@@ -26,6 +26,14 @@ while true; do
   echo "$LOG_PREFIX Start recording, stream saved to \"$FNAME\"."
   echo "$LOG_PREFIX Use command \"tail -f $FNAME.log\" to track recording progress."
 
+  # Record high resolution stream using livedl
+  # Build livedl from https://github.com/himananiito/livedl and
+  # put the binary file to the same directory of this script to enable.
+  if [[ -f "./livedl" ]]; then
+    ./livedl -tcas "$1" > "$FNAME.livedl.log" 2>&1 &
+    echo "$LOG_PREFIX Start recording high resolution stream simultaneously with livedl."
+  fi
+
   # Start recording
   ffmpeg -i "$M3U8_URL" -codec copy -f mpegts "$FNAME" > "$FNAME.log" 2>&1
 
