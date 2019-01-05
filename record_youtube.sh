@@ -10,8 +10,8 @@ fi
 LIVE_URL=$1
 [[ "$1" == "http"* ]] || LIVE_URL="https://www.youtube.com/channel/$1/live"
 
-# Record the best format available but not better that 720p by default
-FORMAT="${2:-720p,480p,best}"
+# Record the highest quality available by default
+FORMAT="${2:-best}"
 
 while true; do
   # Monitor live streams of specific channel

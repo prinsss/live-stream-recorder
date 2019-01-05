@@ -34,7 +34,7 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 
 第一个参数为 YouTube 频道 ID（就是频道 URL `youtube.com/channel` 后面的那个），或者待机室的 URL（即在频道 URL 后面添加 `/live`），这样可以实现无人值守监视开播。参数也可以是某次直播的直播页面 URL（如示例三），不过这样就只能对这一场直播进行录像，录不到该频道的后续直播，所以推荐使用前者。
 
-第二个参数为可选参数，指定录像的画质，不指定的话默认以最高不大于 720p 的格式录像（即 `720p,480p,best`）。指定为 `best` 即可使用可用的最高画质进行录像（注意机器硬盘空间），更多可以使用的格式字符串请参考 [streamlink `STREAM` 参数的文档](https://streamlink.github.io/cli.html#cmdoption-arg-stream)。
+第二个参数为可选参数，指定录像的画质，默认为可用的最高画质。更多可以使用的格式字符串请参考 [streamlink `STREAM` 参数的文档](https://streamlink.github.io/cli.html#cmdoption-arg-stream)。e.g. 指定为 `720p,480p,best` 即可以最高不大于 720p 的格式录像。
 
 第三个参数为可选参数，如果指定为 `once`，那么当前直播的录像完成后脚本会自动退出，而不会继续监视后续直播。
 

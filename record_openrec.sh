@@ -6,8 +6,8 @@ if [[ ! -n "$1" ]]; then
   exit 1
 fi
 
-# Record the best format available but not better that 720p by default
-FORMAT="${2:-720p,480p,best}"
+# Record the highest quality available by default
+FORMAT="${2:-best}"
 
 while true; do
   # Monitor live streams of specific channel
