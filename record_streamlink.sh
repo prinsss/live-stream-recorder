@@ -2,12 +2,13 @@
 # General Live Stream Recorder Powered by Streamlink
 
 if [[ ! -n "$1" ]]; then
-  echo "usage: $0 live_url [format] [loop|once]"
+  echo "usage: $0 live_url [format] [loop|once] [interval]"
   exit 1
 fi
 
 # Record the highest quality available by default
 FORMAT="${2:-best}"
+INTERVAL="${4:-10}"
 
 while true; do
   # Monitor live streams of specific channel
@@ -21,8 +22,8 @@ while true; do
     (echo "$STREAM_URL" | grep -q ".flv") && break
 
     echo "$LOG_PREFIX The stream is not available now."
-    echo "$LOG_PREFIX Retry after 30 seconds..."
-    sleep 30
+    echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
+    sleep $INTERVAL
   done
 
   # Record using MPEG-2 TS format to avoid broken file caused by interruption

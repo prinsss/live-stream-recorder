@@ -2,12 +2,13 @@
 # OPENREC.tv Live Stream Recorder
 
 if [[ ! -n "$1" ]]; then
-  echo "usage: $0 openrec_id [format] [loop|once]"
+  echo "usage: $0 openrec_id [format] [loop|once] [interval]"
   exit 1
 fi
 
 # Record the highest quality available by default
 FORMAT="${2:-best}"
+INTERVAL="${4:-10}"
 
 while true; do
   # Monitor live streams of specific channel
@@ -22,8 +23,8 @@ while true; do
     [[ -n "$LIVE_URL" ]] && break
 
     echo "$LOG_PREFIX The stream is not available now."
-    echo "$LOG_PREFIX Retry after 30 seconds..."
-    sleep 30
+    echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
+    sleep $INTERVAL
   done
 
   # Get the m3u8 address with streamlink

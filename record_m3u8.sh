@@ -2,9 +2,11 @@
 # General m3u8 Live Stream Recorder
 
 if [[ ! -n "$1" ]]; then
-  echo "usage: $0 m3u8_url [loop]"
+  echo "usage: $0 m3u8_url [loop] [interval]"
   exit 1
 fi
+
+INTERVAL="${3:-10}"
 
 while true; do
   # Record using MPEG-2 TS format to avoid broken file caused by interruption
@@ -15,6 +17,6 @@ while true; do
 
   LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
   echo "$LOG_PREFIX The stream is not available now."
-  echo "$LOG_PREFIX Retry after 30 seconds..."
-  sleep 30
+  echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
+  sleep $INTERVAL
 done

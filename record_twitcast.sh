@@ -2,7 +2,7 @@
 # TwitCasting Live Stream Recorder
 
 if [[ ! -n "$1" ]]; then
-  echo "usage: $0 twitcasting_id [loop|once]"
+  echo "usage: $0 twitcasting_id [loop|once] [interval]"
   exit 1
 fi
 
@@ -11,6 +11,8 @@ if [[ ! -f "./livedl" ]]; then
   echo "Please put the binary file of livedl in the same directory first."
   exit 1
 fi
+
+INTERVAL="${3:-10}"
 
 while true; do
   # Monitor live streams of specific user
@@ -21,8 +23,8 @@ while true; do
     (curl -s "$STREAM_API" | grep -q '"live":true') && break
 
     echo "$LOG_PREFIX The stream is not available now."
-    echo "$LOG_PREFIX Retry after 30 seconds..."
-    sleep 30
+    echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
+    sleep $INTERVAL
   done
 
   # Record using MPEG-2 TS format to avoid broken file caused by interruption

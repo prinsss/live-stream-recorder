@@ -4,7 +4,7 @@
 
 因为我喜欢的 VTuber [神楽めあ](https://twitter.com/freeze_mea) 是个喜欢突击直播还不留档的惯犯，所以我写了这些脚本挂在 VPS 上监视直播动态，一开播就自动开始录像，这样就算错过了直播也不用担心。
 
-脚本的工作原理很简单，就是每过 30s 检查一次直播状态（这个延迟可以在脚本中的 `sleep 30` 处调节），如果在播就开始录像，没在播就继续轮询，非常简单粗暴（因为我懒得用 PubSubHubbub，而且我这台 VPS 就是专门为了录 mea 买的，所以不用在意性能之类的问题）。
+脚本的工作原理很简单，就是每隔一段时间检查一次直播状态（这个延迟可以通过脚本调用参数调节），如果在播就开始录像，没在播就继续轮询，非常简单粗暴（因为我懒得用 PubSubHubbub，而且我这台 VPS 就是专门为了录像买的，所以不用在意性能之类的问题）。
 
 这些脚本支持的直播平台基本上覆盖了 mea 的活动范围，如果有其他希望支持的平台也可以开 issue。
 
@@ -23,11 +23,11 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 ## YouTube 自动录像
 
 ```bash
-./record_youtube.sh url [format] [loop|once]
+./record_youtube.sh url [format] [loop|once] [interval]
 
 # Example
 ./record_youtube.sh "UCWCc8tO-uUl_7SJXIKJACMw"
-./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live" best loop
+./record_youtube.sh "https://www.youtube.com/channel/UCWCc8tO-uUl_7SJXIKJACMw/live" best loop 30
 ./record_youtube.sh "https://www.youtube.com/watch?v=NeQrejV3JnE" best once
 ./record_youtube.sh "https://youtu.be/WMu7SGeUTG4" 480p
 ```
@@ -37,6 +37,8 @@ youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
 第二个参数为可选参数，指定录像的画质，默认为可用的最高画质。更多可以使用的格式字符串请参考 [streamlink `STREAM` 参数的文档](https://streamlink.github.io/cli.html#cmdoption-arg-stream)。e.g. 指定为 `720p,480p,best` 即可以最高不大于 720p 的格式录像。
 
 第三个参数为可选参数，如果指定为 `once`，那么当前直播的录像完成后脚本会自动退出，而不会继续监视后续直播。
+
+第四个参数为每次直播流状态检查之间的间隔（单位为秒，默认值为 `10`，即每隔 10s 检查一次）。
 
 录像文件默认保存在脚本文件所在的目录下，文件名格式为 `youtube_{id}_YYMMDD_HHMMSS.ts`。输出的视频文件使用 MPEG-2 TS 容器格式保存，因为 TS 格式有着可以从任意位置开始解码的优势，就算录像过程中因为网络波动等问题造成了中断，也不至于损坏整个视频文件。如果需要转换为 MP4 格式，可以使用以下命令：
 
@@ -49,7 +51,7 @@ ffmpeg -i xxx.ts -codec copy xxx.mp4
 ## OPENREC 自动录像
 
 ```bash
-./record_openrec.sh openrec_id [format] [loop|once]
+./record_openrec.sh openrec_id [format] [loop|once] [interval]
 
 # Example
 ./record_openrec.sh KaguraMea 480p
@@ -58,7 +60,7 @@ ffmpeg -i xxx.ts -codec copy xxx.mp4
 
 此脚本依赖 curl 以从用户频道页面获取当前的直播信息。
 
-第一个参数为 OPENREC 用户名，就是用户主页 URL 中 `openrec.tv/user` 后面的那个。第二、第三个参数与 YouTube 的脚本相同。
+第一个参数为 OPENREC 用户名，就是用户主页 URL 中 `openrec.tv/user` 后面的那个。第二、三、四个参数与 YouTube 的脚本相同。
 
 录像的文件名格式为 `openrec_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
 
@@ -73,21 +75,21 @@ sys.setdefaultencoding('utf8')
 ## Twitch 自动录像
 
 ```bash
-./record_twitch.sh twitch_id [format] [loop|once]
+./record_twitch.sh twitch_id [format] [loop|once] [interval]
 
 # Example
 ./record_twitch.sh kagura0mea 480p
 ./record_twitch.sh wuyikoei best once
 ```
 
-第一个参数为 Twitch 用户名，就是直播页面 URL 中 `twitch.tv` 后面的那个。第二、第三个参数与 YouTube 的脚本相同。
+第一个参数为 Twitch 用户名，就是直播页面 URL 中 `twitch.tv` 后面的那个。第二、三、四个参数与 YouTube 的脚本相同。
 
 录像的文件名格式为 `twitch_{id}_YYMMDD_HHMMSS.ts`，其他与上面的相同。
 
 ## TwitCasting 自动录像
 
 ```bash
-./record_twitcast.sh twitcasting_id [loop|once]
+./record_twitcast.sh twitcasting_id [loop|once] [interval]
 
 # Example
 ./record_twitcast.sh kaguramea
@@ -105,14 +107,14 @@ sys.setdefaultencoding('utf8')
 基本上 [streamlink 支持的直播站点](https://streamlink.github.io/plugin_matrix.html) 都支持（包括国内的斗鱼、熊猫什么的）。
 
 ```bash
-./record_streamlink.sh live_url [format] [loop|once]
+./record_streamlink.sh live_url [format] [loop|once] [interval]
 
 # Example
 ./record_streamlink.sh "https://www.douyu.com/3614"
 ./record_streamlink.sh "https://www.panda.tv/371037"
 ```
 
-第一个参数为直播间 URL，第二、第三个参数与 YouTube 的脚本相同。
+第一个参数为直播间 URL，第二、三、四个参数与 YouTube 的脚本相同。
 
 录像的文件名格式为 `stream_YYMMDD_HHMMSS.ts`，其他与上面的相同。
 
@@ -128,7 +130,7 @@ sys.setdefaultencoding('utf8')
 
 第一个参数为 `.m3u8` 地址，录像的文件名格式为 `stream_YYMMDD_HHMMSS.ts`。
 
-第二个参数为可选参数，指定为 `loop` 可以让脚本每隔 30s 尝试下载该 `.m3u8` 地址。
+第二个参数为可选参数，指定为 `loop` 可以让脚本每隔一段时间（第三个参数）尝试下载该 `.m3u8` 地址。
 
 ## 转播推流
 
