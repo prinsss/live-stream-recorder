@@ -2,7 +2,7 @@
 
 一系列简陋的 Bash 脚本，可以实现 YouTube、OPENREC、Twitch、TwitCasting 等平台主播开播时自动录像。
 
-因为我喜欢的 VTuber [神楽めあ](https://twitter.com/freeze_mea) 是个喜欢突击直播还不留档的惯犯，所以我写了这些脚本挂在 VPS 上监视直播动态，一开播就自动开始录像，这样就算错过了直播也不用担心。
+因为我喜欢的 VTuber [神楽めあ](https://twitter.com/KaguraMea_VoV) 是个喜欢突击直播还不留档的惯犯，所以我写了这些脚本挂在 VPS 上监视直播动态，一开播就自动开始录像，这样就算错过了直播也不用担心。
 
 脚本的工作原理很简单，就是每隔一段时间检查一次直播状态（这个延迟可以通过脚本调用参数调节），如果在播就开始录像，没在播就继续轮询，非常简单粗暴（因为我懒得用 PubSubHubbub，而且我这台 VPS 就是专门为了录像买的，所以不用在意性能之类的问题）。
 
@@ -18,7 +18,17 @@
 
 需要注意的是，各大 Linux 发行版官方软件源中的 ffmpeg 版本可能过旧（3.x 甚至 2.x），录像时会出现奇怪的问题，推荐在 [这里](https://johnvansickle.com/ffmpeg/) 下载最新版本（4.x）的预编译二进制文件。
 
-youtube-dl 和 streamlink 都可以直接使用 pip 进行安装。
+关于 ffmpeg 4.x，Ubuntu 用户可以通过 PPA 进行简易安装：
+```
+sudo add-apt-repository ppa:jonathonf/ffmpeg-4
+sudo apt update
+sudo apt install ffmpeg
+```
+
+youtube-dl 和 streamlink 都可以直接使用 pip 进行安装，以下为相关安装指南：
+
+- [youtube-dl](http://ytdl-org.github.io/youtube-dl/download.html)
+- [streamlink](https://streamlink.github.io/install.html)
 
 ## YouTube 自动录像
 
@@ -185,4 +195,4 @@ root      1755     1  0 13:29 ?        00:00:00 /bin/bash ./record_openrec.sh ..
 
 ## 开源许可
 
-MIT License (c) 2018 printempw
+MIT License (c) 2018-2019 printempw
