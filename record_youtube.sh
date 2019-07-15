@@ -20,18 +20,17 @@ while true; do
     LOG_PREFIX=$(date +"[%Y-%m-%d %H:%M:%S]")
     echo "$LOG_PREFIX Checking \"$LIVE_URL\"..."
 
-    # Try to get video id and title of current live stream.
-    # Add parameters about playlist to avoid downloading
-    # the full video playlist uploaded by channel accidently.
-    METADATA=$(youtube-dl --get-id --get-title --get-description \
-      --no-playlist --playlist-items 1 \
-      --match-filter is_live "$LIVE_URL" 2>/dev/null)
-    [[ -n "$METADATA" ]] && break
+    # Check if live stream available with wget
+    (wget -q -O- "https://www.youtube.com/channel/$1/live" | grep -q '\\"isLive\\":true') && break
 
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
     sleep $INTERVAL
   done
+
+  # Get metadata with youtube-dl when live stream is ready
+  METADATA=$(youtube-dl --get-id --get-title --get-description \
+    --no-playlist --playlist-items 1 "$LIVE_URL" 2>/dev/null)
 
   # Extract video id of live stream
   ID=$(echo "$METADATA" | sed -n '2p')
