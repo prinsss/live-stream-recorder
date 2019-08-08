@@ -21,13 +21,14 @@ while true; do
     echo "$LOG_PREFIX Checking \"$LIVE_URL\"..."
 
     # Check if live stream available with wget
-    (wget -q -O- "https://www.youtube.com/channel/$1/live" | grep -q '\\"isLive\\":true') && break
+    (wget -q -O- "$LIVE_URL" | grep -q '\\"isLive\\":true') && break
 
     echo "$LOG_PREFIX The stream is not available now."
     echo "$LOG_PREFIX Retry after $INTERVAL seconds..."
     sleep $INTERVAL
   done
 
+  # TODO: Use alternative script to retrieve metadata more efficiently.
   # Get metadata with youtube-dl when live stream is ready
   METADATA=$(youtube-dl --get-id --get-title --get-description \
     --no-playlist --playlist-items 1 "$LIVE_URL" 2>/dev/null)
